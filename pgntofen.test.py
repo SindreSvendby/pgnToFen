@@ -193,9 +193,9 @@ class PgnToFenTester(unittest.TestCase):
     def test_enpassent_move(self):
        pgnConverter = pgntofen.PgnToFen()
        pgnConverter.resetBoard()
-       correctFen = 'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR d4'
+       correctFen = 'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR d4 KQkq'
        pgnConverter.pgnToFen(['d4', 'd6']);
-       correctFen = 'rnbqkbnr/ppp1pppp/3p4/8/3P4/8/PPP1PPPP/RNBQKBNR -'
+       correctFen = 'rnbqkbnr/ppp1pppp/3p4/8/3P4/8/PPP1PPPP/RNBQKBNR - KQkq'
        self.assertEqual(correctFen, pgnConverter.getFullFen())
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ class PgnToFen:
     castlingRights = 'KQkq'
 
     def getFullFen(self):
-        return self.getFen() + ' ' + self.enpassant + ' ' + + self.castlingRights 
+        return self.getFen() + ' ' + self.enpassant + ' ' + self.castlingRights 
 
     def getFen(self):
         fenpos = ''
