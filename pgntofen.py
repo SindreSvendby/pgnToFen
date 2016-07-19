@@ -232,12 +232,10 @@ class PgnToFen:
             (existingRow, existingCol) = self.internalChessBoardPlaceToPlaceOnBoard(pos)
             validatePos = str(int(existingRow - newRow)) + str(int(self.columnToInt(existingCol) - newColumn))
             if validatePos in ['2-1','21','1-2','12','-1-2','-12','-2-1','-21']:
-#                print('existingCol: ' + existingCol)
-#                print('specificCol: ' + specificCol)
-#                if not specificCol or specificCol == existingCol:
-#                    if not specificRow or specificRow == existingRow:
-                self.internalChessBoard[pos] = "1"
-                return
+                if not specificCol or specificCol == existingCol:
+                    if not specificRow or (int(specificRow) -1) == int(existingRow):
+                        self.internalChessBoard[pos] = "1"
+                        return
 
     def pawnMove(self, toPosition, specificCol, specificRow, takes, promote):
         if(promote):
