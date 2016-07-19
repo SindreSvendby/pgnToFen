@@ -37,8 +37,9 @@ class PgnToFen:
 
     def pgnToFen(self, moves):
         for move in moves:
+            print('MOVE', move)
             self.handleAllmoves(move)
-            self.printFen()
+            #self.printFen()
             if(self.whiteToMove):
                 self.whiteToMove = False
             else:
@@ -163,7 +164,6 @@ class PgnToFen:
         piece = 'R' if self.whiteToMove else 'r'
         possibelPositons = [i for i, pos in enumerate(self.internalChessBoard) if pos == piece]
         self.validRookMoves(possibelPositons, move, specificCol, specificRow)
-        #print 'old knightPositons: ' + str(oldPos)
         self.internalChessBoard[chessBoardNumber] = piece
 
     def validRookMoves(self, posistions, move, specificCol, specificRow):
@@ -174,8 +174,8 @@ class PgnToFen:
             diffRow = int(existingRow - newRow)
             diffCol = int(self.columnToInt(existingCol) - newColumn)
             if diffRow == 0 or diffCol == 0:
-                if specificCol == False or specificCol == existingCol:
-                    if specificRow == False or specificRow == existingRow:
+                if not specificCol or specificCol == existingCol:
+                    if not specificRow or (int(specificRow) -1) == int(existingRow):
                         self.internalChessBoard[pos] = "1"
                         return
 
@@ -185,7 +185,6 @@ class PgnToFen:
         chessBoardNumber = self.placeOnBoard(row, column)
         piece = 'K' if self.whiteToMove else 'k'
         kingPos = [i for i, pos in enumerate(self.internalChessBoard) if pos == piece]
-        print('kingPos', kingPos[0])
         self.internalChessBoard[chessBoardNumber] = piece
         self.internalChessBoard[kingPos[0]] = '1'
 
@@ -197,7 +196,6 @@ class PgnToFen:
         piece = 'B' if self.whiteToMove else 'b'
         possibelPositons = [i for i, pos in enumerate(self.internalChessBoard) if pos == piece]
         self.validBishopMoves(possibelPositons, move, specificCol, specificRow)
-        #print 'old knightPositons: ' + str(oldPos)
         self.internalChessBoard[chessBoardNumber] = piece
 
     def validBishopMoves(self, posistions, move, specificCol, specificRow):
@@ -207,11 +205,9 @@ class PgnToFen:
             (existingRow, existingCol) = self.internalChessBoardPlaceToPlaceOnBoard(pos)
             diffRow = int(existingRow - newRow)
             diffCol = int(self.columnToInt(existingCol) - newColumn)
-            print(diffRow)
-            print(diffCol)
             if diffRow == diffCol or -diffRow == diffCol or diffRow == -diffCol:
-                if specificCol == False or specificCol == existingCol:
-                    if specificRow == False or specificRow == existingRow:
+                if not specificCol or specificCol == existingCol:
+                    if not specificRow or (int(specificRow) -1) == int(existingRow):
                         self.internalChessBoard[pos] = "1"
                         return
 
@@ -222,7 +218,6 @@ class PgnToFen:
         piece = 'N' if self.whiteToMove else 'n'
         knightPositons = [i for i, pos in enumerate(self.internalChessBoard) if pos == piece]
         self.validKnighMoves(knightPositons, move, specificCol, specificRow)
-        #print 'old knightPositons: ' + str(oldPos)
         self.internalChessBoard[chessBoardNumber] = piece
 
     def validKnighMoves(self, posistions, move, specificCol, specificRow):
@@ -238,8 +233,6 @@ class PgnToFen:
                         return
 
     def pawnMove(self, toPosition, specificCol, specificRow, takes, promote):
-        if(promote):
-            print('promote', promote.lower())
         column = toPosition[:1]
         row = toPosition[1:2]
         chessBoardNumber = self.placeOnBoard(row, column)
@@ -324,15 +317,6 @@ class PgnToFen:
         elif(num == 7):
             return 'h'
 
-
-    def removePiece(self, piece, column):
-        print "Lets remove"
-
-
-
-    def notYetSupported(self):
-        raise ValueError('Unsupported Length in move')
-
     def resetBoard(self):
         self.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
         self.whiteToMove = True
@@ -349,8 +333,8 @@ class PgnToFen:
 
 
 if __name__ == "__main__":
-    pgnFormat = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8  d4 Nbd7 c4 c6 cxb5 axb5 Nc3 Bb7 Bg5 b4 Nb1 h6 Bh4 c5 dxe5 Nxe4 Bxe7 Qxe7 exd6 Qf6 Nbd2 Nxd6 Nc4 Nxc4 Bxc4 Nb6 Ne5 Rae8 Bxf7+ Rxf7 Nxf7 Rxe1+ Qxe1 Kxf7 Qe3 Qg5 Qxg5 hxg5 b3 Ke6 a3 Kd6 axb4 cxb4 Ra5 Nd5 f3 Bc8 Kf2 Bf5 Ra7 g6 Ra6+ Kc5 Ke1 Nf4 g3 Nxh3 Kd2 Kb5 Rd6 Kc5 Ra6 Nf2 g4 Bd3 Re6'
-    pgnFormat = 'e4 e5 Nf3 Nc6 Bb5 a6'
+    pgnFormat = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7 c4 c6 cxb5 axb5 Nc3 Bb7 Bg5 b4 Nb1 h6 Bh4 c5 dxe5 Nxe4 Bxe7 Qxe7 exd6 Qf6 Nbd2 Nxd6 Nc4 Nxc4 Bxc4 Nb6 Ne5 Rae8 Bxf7+ Rxf7 Nxf7 Rxe1+ Qxe1 Kxf7 Qe3 Qg5 Qxg5 hxg5 b3 Ke6 a3 Kd6 axb4 cxb4 Ra5 Nd5 f3 Bc8 Kf2 Bf5 Ra7 g6 Ra6+ Kc5 Ke1 Nf4 g3 Nxh3 Kd2 Kb5 Rd6 Kc5 Ra6 Nf2 g4 Bd3 Re6'
+    #pgnFormat = 'e4 e5 Nf3 Nc6 Bb5 a6'
     #TODO: remember to fix R in front.
     converter = PgnToFen()
     converter.pgnToFen(pgnFormat.split(' '))

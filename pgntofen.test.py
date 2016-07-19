@@ -64,19 +64,26 @@ class PgnToFenTester(unittest.TestCase):
        self.assertEqual(correctFen, pgnConverter.getFen())
 
 
-#    def test_bishop_move(self):
-#       pgnConverter = pgntofen.PgnToFen()
-#       pgnConverter.resetBoard()
-#       correctFen = 'rnbqkbnr/pppppppp/8/8/8/B7/PPPPPPPP/RN1QKBNR'
-#       pgnConverter.pgnToFen(['Ba3']);
-#       self.assertEqual(correctFen, pgnConverter.getFen())
+    def test_bishop_move(self):
+       pgnConverter = pgntofen.PgnToFen()
+       pgnConverter.resetBoard()
+       correctFen = 'rnbqkbnr/pppppppp/8/8/8/B7/PPPPPPPP/RN1QKBNR'
+       pgnConverter.pgnToFen(['Ba3']);
+       self.assertEqual(correctFen, pgnConverter.getFen())
+
+    def test_bishop_move(self):
+       pgnConverter = pgntofen.PgnToFen()
+       pgnConverter.resetBoard()
+       correctFen = 'rnbqkbnr/pppppppp/8/8/8/B7/PPPPPPPP/RN1QKBNR'
+       pgnConverter.pgnToFen(['B1a3']);
+       self.assertEqual(correctFen, pgnConverter.getFen())
 #
-#    def test_rook_move(self):
-#       pgnConverter = pgntofen.PgnToFen()
-#       pgnConverter.resetBoard()
-#       correctFen = 'rnbqkbnr/pppppppp/8/7R/8/8/PPPPPPPP/RNBQKBN1'
-#       pgnConverter.pgnToFen(['Rh5']);
-#       self.assertEqual(correctFen, pgnConverter.getFen())
+    def test_rook_move(self):
+       pgnConverter = pgntofen.PgnToFen()
+       pgnConverter.resetBoard()
+       correctFen = 'rnbqkbnr/pppppppp/8/7R/8/8/PPPPPPPP/RNBQKBN1'
+       pgnConverter.pgnToFen(['Rh1h5']);
+       self.assertEqual(correctFen, pgnConverter.getFen())
 
     def test_king_move(self):
        pgnConverter = pgntofen.PgnToFen()
