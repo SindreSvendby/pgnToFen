@@ -164,9 +164,6 @@ class PgnToFenTester(unittest.TestCase):
         pgnConverter = pgntofen.PgnToFen()
         pgnConverter.resetBoard()
         correctFen = '8/8/4R1p1/2k3p1/1p4P1/1P1b1P2/3K1n2/8'
-        #correctFen = 'r4rk1/1b1nqpp1/3p3p/2p1P3/1p2n3/1B3N1P/PP3PP1/RN1QR1K1' #Qxe7
-        #correctFen = '4rrk1/1b3pp1/1n3q1p/2p1N3/1pB5/7P/PP3PP1/R2QR1K1' #Rae8
-        #correctFen = '4r1k1/1b3rp1/1n3q1p/2p1N3/1p6/7P/PP3PP1/R2QR1K1' #Rxf7
         pgnFormat = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7 c4 c6 cxb5 axb5 Nc3 Bb7 Bg5 b4 Nb1 h6 Bh4 c5 dxe5 Nxe4 Bxe7 Qxe7 exd6 Qf6 Nbd2 Nxd6 Nc4 Nxc4 Bxc4 Nb6 Ne5 Rae8 Bxf7+ Rxf7 Nxf7 Rxe1+ Qxe1 Kxf7 Qe3 Qg5 Qxg5 hxg5 b3 Ke6 a3 Kd6 axb4 cxb4 Ra5 Nd5 f3 Bc8 Kf2 Bf5 Ra7 g6 Ra6+ Kc5 Ke1 Nf4 g3 Nxh3 Kd2 Kb5 Rd6 Kc5 Ra6 Nf2 g4 Bd3 Re6'
         pgnConverter.pgnToFen(pgnFormat.split(' '))
         self.assertEqual(correctFen, pgnConverter.getFen())
@@ -243,6 +240,32 @@ class PgnToFenTester(unittest.TestCase):
            '1','1','1','1','1','1','1','1']
        pgnConverter.pgnToFen(['Rc4']);
        correctFen = '8/4q3/8/7q/2R3R1/8/8/3K4 b - KQkq'
+       self.assertEqual(correctFen, pgnConverter.getFullFen())
+
+    def test_full_game_3(self):
+       pgnConverter = pgntofen.PgnToFen()
+       pgnConverter.resetBoard()
+       moves = "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 Nc6 Bg5 e5 Bxf6 gxf6 Nf5 Bxf5 exf5 Be7 Nd5 O-O c3 Kh8 Bd3 Nb8 O-O Nd7 Be4 Nb6 Nxb6 Qxb6 Qb3 Qc7 Bd5 Bd8 Rad1 Qd7 Rd3 Qxf5 Rf3 Qg6 Qxb7 Bb6 Be4 Qg4 Bxh7 Kxh7 Rh3+ Qxh3 gxh3 f5 Kh1 Rae8 Rg1 Bxf2 Rg2 Be3 Qf3 Bh6 Qxf5+ Kh8 Qf6+ Kh7 Qxd6 e4 Rg4 Re6 Qc5 e3 Qf5+ Kh8 Re4 Rg6 Rg4 Re6 Re4 Rg6 Rh4 Kg7 Qe5+ Kg8 Rg4 Kh7 Qe4 Rg8 Qf5 Rf8 Kg2 Kg7 Kf3 Kh8 Qe5+ Kh7 Qe4 Kh8 Ke2 Re6 Qd4+ Kh7 Qxa7 Rf6 Qd4 Rf2+ Ke1 Re8 Qd3+ Kh8 Qd6 Kh7 Rh4 Re6 Qd3+ Kh8 Qd4+ Kh7 Qd3+ Kh8 Rxh6+ Rxh6 Qxe3 Rff6 Qd4 Kg8 a4 Re6+ Kf2 Ref6+ Kg3 Rhg6+ Kh4 Rd6 Qe4 Rde6 Qa8+ Kg7 Qd5 Re2 Qd4+ Kh7 Qf4 Kg8 Qb8+ Kg7 Qf4 Reg2 Qd4+ Kh7 Qe4 Rxb2 a5 Rb8 a6 Rh8 Qe5 Kg8+"
+       pgnConverter.pgnToFen(moves.split(' '));
+       correctFen = '6kr/5p2/P5r1/4Q3/7K/2P4P/7P/8 w - -'
+       self.assertEqual(correctFen, pgnConverter.getFullFen())
+
+    def test_real_example_self_discovery_chess(self):
+       pgnConverter = pgntofen.PgnToFen()
+       pgnConverter.resetBoard()
+       pgnConverter.internalChessBoard = [
+           '1','1','1','1','1','1','1','K',
+           'P','P','1','1','1','1','1','P',
+           '1','1','P','1','p','1','1','P',
+           '1','1','1','1','Q','1','R','1',
+           '1','1','1','1','1','1','1','q',
+           '1','1','1','1','1','1','r','b',
+           'p','1','1','1','1','p','1','k',
+           '1','1','1','1','1','r','1','1']
+       pgnConverter.whiteToMove = False
+
+       pgnConverter.pgnToFen(['Rg8']);
+       correctFen = '6r1/p4p1k/6rb/7q/4Q1R1/2P1p2P/PP5P/7K w - KQkq'
        self.assertEqual(correctFen, pgnConverter.getFullFen())
 
 if __name__ == '__main__':

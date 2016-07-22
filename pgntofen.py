@@ -45,10 +45,10 @@ class PgnToFen:
     def pgnToFen(self, moves):
         loopC = 1
         for move in moves:
-            #self.printBoard()
-            #print('TO MOVE:', 'w' if self.whiteToMove else 'b')
-            #print('MOVE:', move)
-            #print('Movenumber',loopC)
+            self.printBoard()
+            print('TO MOVE:', 'w' if self.whiteToMove else 'b')
+            print('MOVE:', move)
+            print('Movenumber',loopC)
             self.move(move)
             #self.printFen()
             loopC = loopC + 1
@@ -195,15 +195,9 @@ class PgnToFen:
         newPos = self.placeOnBoard(newRow + 1, move[:1])
         potensialPosisitionsToRemove=[]
         for pos in posistions:
-            print('checking posistion', pos)
             (existingRow, existingCol) = self.internalChessBoardPlaceToPlaceOnBoard(pos)
-            print('existingRow', existingRow)
-            print('existingCol', existingCol)
             diffRow = int(existingRow - newRow)
             diffCol = int(self.columnToInt(existingCol) - newColumn)
-            print('diffRow', diffRow)
-            print('diffCol', diffCol)
-            print('posistion ' + str(pos) + ' (' + str(existingCol) + str(int(existingRow) + 1) + ')')
             if diffRow == 0 or diffCol == 0:
                 if not specificCol or specificCol == existingCol:
                     if not specificRow or (int(specificRow) -1) == int(existingRow):
@@ -222,16 +216,12 @@ class PgnToFen:
                             if(checkPos == newPos):
                                 continue
                             if self.internalChessBoard[checkPos] != "1":
-                                print('Something in between')
                                 nothingInBetween = False
                         if nothingInBetween:
-                            print('Nothing in between')
                             potensialPosisitionsToRemove.append(pos)
         if len(potensialPosisitionsToRemove) == 1:
-            print("Only one piece valid")
             correctPos = potensialPosisitionsToRemove[0];
         else:
-            print("Several valid posisitions")
             if len(potensialPosisitionsToRemove) == 0:
                 raise ValueError('Cant find a valid posistion to remove', potensialPosisitionsToRemove)
             notInCheckLineBindNewPos = partial(self.notInCheckLine, self.posOnBoard('K'))
@@ -247,7 +237,6 @@ class PgnToFen:
             self.castlingRights = self.castlingRights.replace('K', '')
         elif(correctPos == (63-8)):
             self.castlingRights = self.castlingRights.replace('q', '')
-        print('Posistion to remove' + str(correctPos))
         self.internalChessBoard[correctPos] = "1"
         return
 
@@ -464,63 +453,56 @@ class PgnToFen:
         (pieceRowInt, pieceColumn) = self.internalChessBoardPlaceToPlaceOnBoard(piecePos);
         pieceColumnInt = self.columnToInt(pieceColumn)
 
-        print('kingPos: column', kingColumnInt)
-        print('kingPos: row', kingRowInt)
-
-        print('linePiecePos: column', pieceColumnInt)
-        print('linePiecePos: row', pieceRowInt)
-
         diffRow = int(kingRowInt - pieceRowInt)
         diffCol = int(kingColumnInt - pieceColumnInt)
-        xVect = 0
-        yVect = 0
+        print('diffRow', diffRow)
+        print('diffCol', diffCol)
+        if (abs(diffRow) !=  abs(diffCol)) and diffRow != 0 and diffCol != 0:
+            #Not in vertial or horisontal line or diagonal
+            print('Not in vertial or horisontal line or diagonal')
+            return True
         if abs(diffRow) > abs(diffCol):
             xVect = (diffCol / abs(diffRow))
             yVect = -(diffRow / abs(diffRow))
         else:
             xVect = -(diffCol / abs(diffCol))
             yVect = -(diffRow / abs(diffCol))
-        print('Direction: ' + str(xVect) + ',' + str(yVect))
         checkPos = kingPos
+        print('kingPos', kingPos)
+        print('yVect', yVect)
+        print('xVect', xVect)
+        print('piecePos', piecePos)
         nothingInBetween = True
-        while(checkPos != piecePos):
+        while checkPos != piecePos and (checkPos < 64 and checkPos > 0):
             checkPos = checkPos + yVect * 8 + xVect
-            print('Checkpos: ', checkPos)
             if(checkPos == piecePos):
                 continue
             if self.internalChessBoard[checkPos] != "1":
-                print('Something between king and piece, returning a false value')
+                #print('Something between king and piece, returning a false value')
                 # Piece between the king and the piece can not be a self-disvoery-check.
                 return True
+        #print('No piece between the king and the piece, need to verify if an enemy piece with the possibily to go that  direction exist')
         # No piece between the king and the piece, need to verify if an enemy piece with the possibily to go that  direction exist
-        print('Nothing between king(' + str(kingPos) + ') and piece(' + str(piecePos) + ')')
-        print("let's check for a enemy piece between piece(" + str(piecePos) + ") and end of board")
-        if(xVect in (1, -1) and yVect == 0):
-            columnNr = (piecePos % 8)
-            if(xVect == 1):
-                endOfBoard = piecePos + 7 - columnNr
-            else: # xVect -1
-                endOfBoard = piecePos - 7 - columnNr
-        elif(yVect in (1, -1) and xVect == 0):
-            endOfBoard = 63 # will get smallere then 0 or highere then 63, no need to hande this
-        elif(xVect == 0 and yVect == 0):
-            raise ValueError('xVect and yVect are both 0...???')
+
+        columnNr = (piecePos % 8)
+        if(xVect == 1):
+            columnsLeft = 7- columnNr
         else:
-            columnNr = (piecePos % 8)
-            if(xVect == 1):
-                columnsLeft = 7- columnNr
-            else:
-                columnsLeft = columnNr
-            posInMove = (yVect * 8) + xVect
-            endOfBoard = piecePos + posInMove * columnsLeft
+            columnsLeft = columnNr
+        posInMove = (yVect * 8) + xVect
+        print('piecePos', piecePos)
+        print('posInMove', posInMove)
+
+        print('columnsLeft', columnsLeft)
 
 
-        while checkPos >= 0 and checkPos < 64 and checkPos <= endOfBoard:
-            checkPos = checkPos + yVect * 8 + xVect
-            if(checkPos < 0 or checkPos > 63 or checkPos > endOfBoard):
+        while checkPos >= 0 and checkPos < 64 and columnsLeft > -1:
+            print('columnsLeft', columnsLeft)
+            columnsLeft = columnsLeft - abs(xVect)
+            checkPos = checkPos + posInMove
+            print('checkPos', checkPos)
+            if(checkPos < 0 or checkPos > 63):
                 continue
-            print('Checkpos: ', checkPos)
-            print('endOfBoard', endOfBoard)
             if self.internalChessBoard[checkPos] == "1":
                 print('empty space, continue: ', checkPos)
                 continue
@@ -533,7 +515,6 @@ class PgnToFen:
                 return False
             else:
                 print('WTF, piece on board is:', self.internalChessBoard[checkPos], checkPos)
-        print('Valid piece to move', piecePos)
         return True
 
     def getOppositePieces(self, pieces):
