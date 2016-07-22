@@ -17,6 +17,7 @@ class PgnToFen:
         'r','n','b','q','k','b','n','r']
     enpassant = '-'
     castlingRights = 'KQkq'
+    DEBUG = False
 
     def getFullFen(self):
         return self.getFen() + ' ' + ('w ' if self.whiteToMove else 'b ') + self.enpassant + ' ' + (self.castlingRights if self.castlingRights else '-')
@@ -45,12 +46,13 @@ class PgnToFen:
     def pgnToFen(self, moves):
         loopC = 1
         for move in moves:
-            self.printBoard()
-            print('TO MOVE:', 'w' if self.whiteToMove else 'b')
-            print('MOVE:', move)
-            print('Movenumber',loopC)
+            self.DEBUG and print('=========')
+            self.DEBUG and print('Movenumber',loopC)
+            self.DEBUG and print('TO MOVE:', 'w' if self.whiteToMove else 'b')
+            self.DEBUG and print('MOVE:', move)
             self.move(move)
-            #self.printFen()
+            self.DEBUG and print('after move:')
+            self.DEBUG and self.printBoard()
             loopC = loopC + 1
         return self
 
@@ -153,6 +155,7 @@ class PgnToFen:
         newColumn = self.columnToInt(move[:1])
         newRow = self.rowToInt(move[1:2])
         newPos = self.placeOnBoard(newRow + 1, move[:1])
+        potensialPosisitionsToRemove=[]
         for pos in posistions:
             (existingRow, existingCol) = self.internalChessBoardPlaceToPlaceOnBoard(pos)
             diffRow = int(existingRow - newRow)
@@ -177,8 +180,22 @@ class PgnToFen:
                             if self.internalChessBoard[checkPos] != "1":
                                 nothingInBetween = False
                         if nothingInBetween:
-                            self.internalChessBoard[pos] = "1"
-                            return
+                            potensialPosisitionsToRemove.append(pos)
+        if len(potensialPosisitionsToRemove) == 1:
+            correctPos = potensialPosisitionsToRemove[0];
+        else:
+            if len(potensialPosisitionsToRemove) == 0:
+                raise ValueError('Cant find a valid posistion to remove', potensialPosisitionsToRemove)
+            notInCheckLineBindNewPos = partial(self.notInCheckLine, self.posOnBoard('K'))
+            correctPosToRemove = filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove)
+            if len(correctPosToRemove) > 1:
+                raise ValueError('Several valid positions to remove from the board')
+            if len(correctPosToRemove) == 0:
+                raise ValueError('None valid positions to remove from the board')
+            correctPos = correctPosToRemove[0]
+        self.internalChessBoard[correctPos] = "1"
+        return
+
 
     def rookMove(self, move, specificCol, specificRow):
         column = move[:1]
@@ -194,6 +211,9 @@ class PgnToFen:
         newRow = self.rowToInt(move[1:2])
         newPos = self.placeOnBoard(newRow + 1, move[:1])
         potensialPosisitionsToRemove=[]
+        if(len(posistions) == 1):
+            self.internalChessBoard[posistions[0]] = "1"
+            return
         for pos in posistions:
             (existingRow, existingCol) = self.internalChessBoardPlaceToPlaceOnBoard(pos)
             diffRow = int(existingRow - newRow)
@@ -266,7 +286,7 @@ class PgnToFen:
         newColumn = self.columnToInt(move[:1])
         newRow = self.rowToInt(move[1:2])
         newPos = self.placeOnBoard(newRow + 1, move[:1])
-
+        potensialPosisitionsToRemove = []
         for pos in posistions:
             (existingRow, existingCol) = self.internalChessBoardPlaceToPlaceOnBoard(pos)
             diffRow = int(existingRow - newRow)
@@ -291,8 +311,18 @@ class PgnToFen:
                             if self.internalChessBoard[checkPos] != "1":
                                 nothingInBetween = False
                         if nothingInBetween:
-                            self.internalChessBoard[pos] = "1"
-                            return
+                            potensialPosisitionsToRemove.append(pos)
+        if len(potensialPosisitionsToRemove) == 1:
+            correctPos = potensialPosisitionsToRemove[0];
+        else:
+            if len(potensialPosisitionsToRemove) == 0:
+                raise ValueError('Cant find a valid posistion to remove', potensialPosisitionsToRemove)
+            notInCheckLineBindNewPos = partial(self.notInCheckLine, self.posOnBoard('K'))
+            correctPosToRemove = filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove)
+            if len(correctPosToRemove) > 1:
+                raise ValueError('Several valid positions to remove from the board')
+            correctPos = correctPosToRemove[0]
+        self.internalChessBoard[correctPos] = "1"
 
     def knightMove(self, move, specificCol, specificRow):
         column = move[:1]
@@ -306,15 +336,28 @@ class PgnToFen:
     def validKnighMoves(self, posistions, move, specificCol, specificRow):
         newColumn = self.columnToInt(move[:1])
         newRow = self.rowToInt(move[1:2])
+        potensialPosisitionsToRemove = []
         for pos in posistions:
             (existingRow, existingCol) = self.internalChessBoardPlaceToPlaceOnBoard(pos)
             validatePos = str(int(existingRow - newRow)) + str(int(self.columnToInt(existingCol) - newColumn))
             if validatePos in ['2-1','21','1-2','12','-1-2','-12','-2-1','-21']:
                 if not specificCol or specificCol == existingCol:
                     if not specificRow or (int(specificRow) -1) == int(existingRow):
-                        self.internalChessBoard[pos] = "1"
-                        return
-
+                            potensialPosisitionsToRemove.append(pos)
+        if len(potensialPosisitionsToRemove) == 1:
+            correctPos = potensialPosisitionsToRemove[0];
+        else:
+            if len(potensialPosisitionsToRemove) == 0:
+                raise ValueError('Cant find a valid posistion to remove', potensialPosisitionsToRemove)
+            notInCheckLineBindNewPos = partial(self.notInCheckLine, self.posOnBoard('K'))
+            correctPosToRemove = filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove)
+            if len(correctPosToRemove) > 1:
+                raise ValueError('Several valid positions to remove from the board')
+            if len(correctPosToRemove) == 0:
+                raise ValueError('None valid positions to remove from the board')
+            correctPos = correctPosToRemove[0]
+        self.internalChessBoard[correctPos] = "1"
+        return
     def pawnMove(self, toPosition, specificCol, specificRow, takes, promote):
         column = toPosition[:1]
         row = toPosition[1:2]
@@ -455,11 +498,12 @@ class PgnToFen:
 
         diffRow = int(kingRowInt - pieceRowInt)
         diffCol = int(kingColumnInt - pieceColumnInt)
-        print('diffRow', diffRow)
-        print('diffCol', diffCol)
+        self.DEBUG and print('checkLine: kingPos:', kingPos)
+        self.DEBUG and print('checkLine: piecePos:', piecePos)
+        self.DEBUG and print('checkLine: diffCol:', diffCol)
+        self.DEBUG and print('checkLine: diffRow:', diffRow)
         if (abs(diffRow) !=  abs(diffCol)) and diffRow != 0 and diffCol != 0:
-            #Not in vertial or horisontal line or diagonal
-            print('Not in vertial or horisontal line or diagonal')
+            self.DEBUG and print('checkLine: Not in vertial or horisontal line or diagonal, returning False => can not be a self-disvoery-check', )
             return True
         if abs(diffRow) > abs(diffCol):
             xVect = (diffCol / abs(diffRow))
@@ -468,10 +512,6 @@ class PgnToFen:
             xVect = -(diffCol / abs(diffCol))
             yVect = -(diffRow / abs(diffCol))
         checkPos = kingPos
-        print('kingPos', kingPos)
-        print('yVect', yVect)
-        print('xVect', xVect)
-        print('piecePos', piecePos)
         nothingInBetween = True
         while checkPos != piecePos and (checkPos < 64 and checkPos > 0):
             checkPos = checkPos + yVect * 8 + xVect
@@ -490,31 +530,19 @@ class PgnToFen:
         else:
             columnsLeft = columnNr
         posInMove = (yVect * 8) + xVect
-        print('piecePos', piecePos)
-        print('posInMove', posInMove)
-
-        print('columnsLeft', columnsLeft)
-
 
         while checkPos >= 0 and checkPos < 64 and columnsLeft > -1:
-            print('columnsLeft', columnsLeft)
             columnsLeft = columnsLeft - abs(xVect)
             checkPos = checkPos + posInMove
-            print('checkPos', checkPos)
             if(checkPos < 0 or checkPos > 63):
                 continue
-            if self.internalChessBoard[checkPos] == "1":
-                print('empty space, continue: ', checkPos)
-                continue
-            elif self.internalChessBoard[checkPos] in self.getOppositePieces(["Q", "R"]) and (xVect == 0 or yVect == 0):
-                print('Found a : ', self.internalChessBoard[checkPos], 'on the line')
+            if self.internalChessBoard[checkPos] in self.getOppositePieces(["Q", "R"]) and (xVect == 0 or yVect == 0):
                 return False
             elif self.internalChessBoard[checkPos] in self.getOppositePieces(["Q", "B"]) and True:
-                print('Found a : ', self.internalChessBoard[checkPos], 'in the diagonal')
                 #TODO: check direction
                 return False
-            else:
-                print('WTF, piece on board is:', self.internalChessBoard[checkPos], checkPos)
+            #else:
+                #print('Friendly pieces or empty:', self.internalChessBoard[checkPos], checkPos)
         return True
 
     def getOppositePieces(self, pieces):
