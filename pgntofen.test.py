@@ -197,23 +197,53 @@ class PgnToFenTester(unittest.TestCase):
        pgnConverter.pgnToFen(['d4']);
        self.assertEqual(correctFen, pgnConverter.getFullFen())
 
-    def test_self_discovery_chek_rook_move(self):
+    def test_self_discovery_chek_rook_move_diagonal(self):
        pgnConverter = pgntofen.PgnToFen()
        pgnConverter.resetBoard()
-       correctFen = 'K6R/1R6/8/8/8/8/8/7q - -'
-       pgnConverter.pgnToFen(['Ra2']);
-       correctFen = 'KR6R/8/8/8/8/8/8/8 - -'
+       pgnConverter.internalChessBoard = [
+           'K','1','1','1','1','1','1','R',
+           '1','1','1','1','1','1','1','1',
+           '1','1','R','1','1','1','1','1',
+           '1','1','1','1','1','1','1','1',
+           '1','1','1','1','1','1','1','1',
+           '1','1','1','1','1','1','1','1',
+           '1','1','1','1','1','1','q','1',
+           '1','1','1','1','1','1','1','1']
+       pgnConverter.pgnToFen(['Rc1']);
+       correctFen = '8/6q1/8/8/8/2R5/8/K1R5 b - Qkq'
+       self.assertEqual(correctFen, pgnConverter.getFullFen())
+
+    def test_self_discovery_chek_rook_move_line(self):
+       pgnConverter = pgntofen.PgnToFen()
+       pgnConverter.resetBoard()
+       pgnConverter.internalChessBoard = [
+           'K','1','R','1','1','1','1','1',
+           '1','1','1','1','1','1','1','1',
+           'R','1','1','1','1','1','1','1',
+           '1','1','1','1','1','1','1','1',
+           '1','1','1','1','1','1','1','1',
+           '1','1','1','1','1','1','1','1',
+           'q','1','1','1','1','1','1','1',
+           '1','1','1','1','1','1','1','1']
+       pgnConverter.pgnToFen(['Rc3']);
+       correctFen = '8/q7/8/8/8/R1R5/8/K7 b - KQkq'
+       self.assertEqual(correctFen, pgnConverter.getFullFen())
+
+    def test_self_discovery_chek_rook_move_diagnal_another_pos(self):
+       pgnConverter = pgntofen.PgnToFen()
+       pgnConverter.resetBoard()
+       pgnConverter.internalChessBoard = [
+           '1','1','1','K','1','1','1','1',
+           '1','1','R','1','1','1','1','1',
+           '1','1','1','1','1','1','1','1',
+           '1','1','1','1','1','1','R','1',
+           '1','1','1','1','1','1','1','q',
+           '1','1','1','1','1','1','1','1',
+           '1','1','1','1','q','1','1','1',
+           '1','1','1','1','1','1','1','1']
+       pgnConverter.pgnToFen(['Rc4']);
+       correctFen = '8/4q3/8/7q/2R3R1/8/8/3K4 b - KQkq'
        self.assertEqual(correctFen, pgnConverter.getFullFen())
 
 if __name__ == '__main__':
     unittest.main()
-
-
-#['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R',
-#'P', 'P', 'P', 'P', '1', 'P', 'P', 'P',
-#'1', '1', '1', '1', '1', '1', '1', '1',
-#'1', '1', '1', '1', '1', '1', '1', '1',
-#'1', '1', '1', '1', 'P', '1', '1', '1',
-#'1', '1', '1', '1', '1', '1', '1', '1',
-#'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p',
-#'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']

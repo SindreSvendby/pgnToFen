@@ -1,5 +1,6 @@
 #!/bin/python
 from __future__ import print_function
+from functools import partial
 import math
 
 class PgnToFen:
@@ -192,12 +193,17 @@ class PgnToFen:
         newColumn = self.columnToInt(move[:1])
         newRow = self.rowToInt(move[1:2])
         newPos = self.placeOnBoard(newRow + 1, move[:1])
-
+        potensialPosisitionsToRemove=[]
         for pos in posistions:
+            print('checking posistion', pos)
             (existingRow, existingCol) = self.internalChessBoardPlaceToPlaceOnBoard(pos)
+            print('existingRow', existingRow)
+            print('existingCol', existingCol)
             diffRow = int(existingRow - newRow)
-            #self.printFen()
             diffCol = int(self.columnToInt(existingCol) - newColumn)
+            print('diffRow', diffRow)
+            print('diffCol', diffCol)
+            print('posistion ' + str(pos) + ' (' + str(existingCol) + str(int(existingRow) + 1) + ')')
             if diffRow == 0 or diffCol == 0:
                 if not specificCol or specificCol == existingCol:
                     if not specificRow or (int(specificRow) -1) == int(existingRow):
@@ -216,19 +222,34 @@ class PgnToFen:
                             if(checkPos == newPos):
                                 continue
                             if self.internalChessBoard[checkPos] != "1":
+                                print('Something in between')
                                 nothingInBetween = False
                         if nothingInBetween:
-                            if(pos == 0):
-                                self.castlingRights = self.castlingRights.replace('Q', '')
-                            elif(pos == 63):
-                                self.castlingRights = self.castlingRights.replace('k', '')
-                            elif(pos == 7):
-                                self.castlingRights = self.castlingRights.replace('K', '')
-                            elif(pos == (63-8)):
-                                self.castlingRights = self.castlingRights.replace('q', '')
-                            self.internalChessBoard[pos] = "1"
-                            return
-        raise ValueError('Cant find a valid posistion to remove', posistions, move)
+                            print('Nothing in between')
+                            potensialPosisitionsToRemove.append(pos)
+        if len(potensialPosisitionsToRemove) == 1:
+            print("Only one piece valid")
+            correctPos = potensialPosisitionsToRemove[0];
+        else:
+            print("Several valid posisitions")
+            if len(potensialPosisitionsToRemove) == 0:
+                raise ValueError('Cant find a valid posistion to remove', potensialPosisitionsToRemove)
+            notInCheckLineBindNewPos = partial(self.notInCheckLine, self.posOnBoard('K'))
+            correctPosToRemove = filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove)
+            if len(correctPosToRemove) > 1:
+                raise ValueError('Several valid positions to remove from the board')
+            correctPos = correctPosToRemove[0]
+        if(correctPos == 0):
+            self.castlingRights = self.castlingRights.replace('Q', '')
+        elif(correctPos == 63):
+            self.castlingRights = self.castlingRights.replace('k', '')
+        elif(correctPos == 7):
+            self.castlingRights = self.castlingRights.replace('K', '')
+        elif(correctPos == (63-8)):
+            self.castlingRights = self.castlingRights.replace('q', '')
+        print('Posistion to remove' + str(correctPos))
+        self.internalChessBoard[correctPos] = "1"
+        return
 
     def kingMove(self, move, specificCol, specificRow):
         column = move[:1]
@@ -430,6 +451,109 @@ class PgnToFen:
                 print()
             loop = loop + 1
 
+    def notInCheckLine(self, kingPos, piecePos):
+        """
+            Verifies that the piece is not standing in "line of fire" between and enemy piece and your king as the only piece
+            :returns: True if the piece can move
+        """
+        return self.checkLine(kingPos, piecePos)
+
+    def checkLine(self, kingPos, piecePos):
+        (kingRowInt, kingColumn) = self.internalChessBoardPlaceToPlaceOnBoard(kingPos)
+        kingColumnInt = self.columnToInt(kingColumn)
+        (pieceRowInt, pieceColumn) = self.internalChessBoardPlaceToPlaceOnBoard(piecePos);
+        pieceColumnInt = self.columnToInt(pieceColumn)
+
+        print('kingPos: column', kingColumnInt)
+        print('kingPos: row', kingRowInt)
+
+        print('linePiecePos: column', pieceColumnInt)
+        print('linePiecePos: row', pieceRowInt)
+
+        diffRow = int(kingRowInt - pieceRowInt)
+        diffCol = int(kingColumnInt - pieceColumnInt)
+        xVect = 0
+        yVect = 0
+        if abs(diffRow) > abs(diffCol):
+            xVect = (diffCol / abs(diffRow))
+            yVect = -(diffRow / abs(diffRow))
+        else:
+            xVect = -(diffCol / abs(diffCol))
+            yVect = -(diffRow / abs(diffCol))
+        print('Direction: ' + str(xVect) + ',' + str(yVect))
+        checkPos = kingPos
+        nothingInBetween = True
+        while(checkPos != piecePos):
+            checkPos = checkPos + yVect * 8 + xVect
+            print('Checkpos: ', checkPos)
+            if(checkPos == piecePos):
+                continue
+            if self.internalChessBoard[checkPos] != "1":
+                print('Something between king and piece, returning a false value')
+                # Piece between the king and the piece can not be a self-disvoery-check.
+                return True
+        # No piece between the king and the piece, need to verify if an enemy piece with the possibily to go that  direction exist
+        print('Nothing between king(' + str(kingPos) + ') and piece(' + str(piecePos) + ')')
+        print("let's check for a enemy piece between piece(" + str(piecePos) + ") and end of board")
+        if(xVect in (1, -1) and yVect == 0):
+            columnNr = (piecePos % 8)
+            if(xVect == 1):
+                endOfBoard = piecePos + 7 - columnNr
+            else: # xVect -1
+                endOfBoard = piecePos - 7 - columnNr
+        elif(yVect in (1, -1) and xVect == 0):
+            endOfBoard = 63 # will get smallere then 0 or highere then 63, no need to hande this
+        elif(xVect == 0 and yVect == 0):
+            raise ValueError('xVect and yVect are both 0...???')
+        else:
+            columnNr = (piecePos % 8)
+            if(xVect == 1):
+                columnsLeft = 7- columnNr
+            else:
+                columnsLeft = columnNr
+            posInMove = (yVect * 8) + xVect
+            endOfBoard = piecePos + posInMove * columnsLeft
+
+
+        while checkPos >= 0 and checkPos < 64 and checkPos <= endOfBoard:
+            checkPos = checkPos + yVect * 8 + xVect
+            if(checkPos < 0 or checkPos > 63 or checkPos > endOfBoard):
+                continue
+            print('Checkpos: ', checkPos)
+            print('endOfBoard', endOfBoard)
+            if self.internalChessBoard[checkPos] == "1":
+                print('empty space, continue: ', checkPos)
+                continue
+            elif self.internalChessBoard[checkPos] in self.getOppositePieces(["Q", "R"]) and (xVect == 0 or yVect == 0):
+                print('Found a : ', self.internalChessBoard[checkPos], 'on the line')
+                return False
+            elif self.internalChessBoard[checkPos] in self.getOppositePieces(["Q", "B"]) and True:
+                print('Found a : ', self.internalChessBoard[checkPos], 'in the diagonal')
+                #TODO: check direction
+                return False
+            else:
+                print('WTF, piece on board is:', self.internalChessBoard[checkPos], checkPos)
+        print('Valid piece to move', piecePos)
+        return True
+
+    def getOppositePieces(self, pieces):
+            """"
+                Takes a list of pieces and returns it in uppercase if blacks turn, or lowercase if white.
+            """
+            return map(lambda p: p.lower() if self.whiteToMove else p.upper(), pieces)
+
+
+    def posOnBoard(self, piece):
+        """
+            :param piece: a case _sensitiv_ one letter string. Valid 'K', 'Q', 'N', 'P', 'B', 'R', will be transformed to lowercase if it's black's turn to move
+            :return int|[int]: Returns the posistion(s) on the board for a piece, if only one pos, a int is return, else a list of int is returned
+        """
+        correctPiece = piece if self.whiteToMove else piece.lower()
+        posistionsOnBoard = [i for i, pos in enumerate(self.internalChessBoard) if pos == correctPiece]
+        if len(posistionsOnBoard) == 1:
+            return posistionsOnBoard[0]
+        else:
+            return posistionsOnBoard
 
 if __name__ == "__main__":
     pgnFormat = 'c4 Nc6 Nc3 e5 Nf3 Nf6 g3 d5 cxd5 Nxd5 Bg2 Nb6 O-O Be7 a3 Be6 b4 a5 b5 Nd4 Nxd4 exd4 Na4 Bd5 Nxb6 cxb6 Bxd5'
