@@ -42,25 +42,24 @@ class PgnToFen:
         print(self.getFen())
 
     def pgnToFen(self, moves):
+        loopC = 1
         for move in moves:
-            self.printBoard()
-            print('MOVE', move)
-            self.handleAllmoves(move)
+            #self.printBoard()
+            #print('TO MOVE:', 'w' if self.whiteToMove else 'b')
+            #print('MOVE:', move)
+            #print('Movenumber',loopC)
+            self.move(move)
             #self.printFen()
-            if(self.whiteToMove):
-                self.whiteToMove = False
-            else:
-                self.whiteToMove = True
+            loopC = loopC + 1
         return self
 
-
-#    def findPiece(self, move):
-#        moves = {
-#            2: self.simpleMove,
-#        }
-#        print 'Move:' + move
-#        func = moves.get(len(move), self.handleAllmoves)
-#        return func(move)
+    def move(self, move):
+        self.handleAllmoves(move)
+        if(self.whiteToMove):
+            self.whiteToMove = False
+        else:
+            self.whiteToMove = True
+        return self
 
     def handleAllmoves(self, move):
         move = move.replace('+', '')
@@ -96,6 +95,8 @@ class PgnToFen:
             elif len(move) == 2:
                 specificCol = move[0]
                 specificRow = move[1]
+        if(officer != 'P'):
+            self.enpassant = '-'
         if(officer == 'N'):
             self.knightMove(toPosition, specificCol, specificRow)
         elif(officer == 'B'):
@@ -190,15 +191,12 @@ class PgnToFen:
     def validRookMoves(self, posistions, move, specificCol, specificRow):
         newColumn = self.columnToInt(move[:1])
         newRow = self.rowToInt(move[1:2])
-        print('newRow', newRow)
-        print('newColumn', move[:1])
         newPos = self.placeOnBoard(newRow + 1, move[:1])
 
         for pos in posistions:
             (existingRow, existingCol) = self.internalChessBoardPlaceToPlaceOnBoard(pos)
             diffRow = int(existingRow - newRow)
-            print('newColumn', newColumn)
-            self.printFen()
+            #self.printFen()
             diffCol = int(self.columnToInt(existingCol) - newColumn)
             if diffRow == 0 or diffCol == 0:
                 if not specificCol or specificCol == existingCol:
@@ -276,12 +274,10 @@ class PgnToFen:
                             yVect = -(diffRow / abs(diffCol))
                         checkPos = pos
                         nothingInBetween = True
-                        print('newPos', newPos)
                         while(checkPos != newPos):
                             checkPos = checkPos + yVect * 8 + xVect
                             if(checkPos == newPos):
                                 continue
-                            print('checkPos', checkPos)
                             if self.internalChessBoard[checkPos] != "1":
                                 nothingInBetween = False
                         if nothingInBetween:
@@ -314,7 +310,7 @@ class PgnToFen:
         row = toPosition[1:2]
         chessBoardNumber = self.placeOnBoard(row, column)
         if(promote):
-            piece = promote if self.whiteToMove else promote
+            piece = promote if self.whiteToMove else promote.lower()
         else:
             piece = 'P' if self.whiteToMove else 'p'
         self.internalChessBoard[chessBoardNumber] = piece
@@ -323,16 +319,13 @@ class PgnToFen:
             posistion = self.placeOnBoard(removeFromRow, specificCol)
             piece = self.internalChessBoard[posistion] = '1'
             if(self.enpassant != '-'):
-                print('COL', self.enpassant)
                 enpassantPos = self.placeOnBoard(self.enpassant[1], self.enpassant[0])
-                print('enpassantPos', enpassantPos)
                 toPositionPos = self.placeOnBoard(toPosition[1], toPosition[0])
-                print('toPositionPos', toPositionPos)
-                if(enpassantPos == toPositionPos):
+                if(self.enpassant == toPosition):
                     if(self.whiteToMove == True):
-                        self.internalChessBoard[toPositionPos - 8] = '1'
+                        self.internalChessBoard[chessBoardNumber - 8] = '1'
                     else:
-                        self.internalChessBoard[toPositionPos + 8] = '1'
+                        self.internalChessBoard[chessBoardNumber + 8] = '1'
                         return
 
         else:
@@ -352,7 +345,6 @@ class PgnToFen:
                     (row, column) = self.internalChessBoardPlaceToPlaceOnBoard(startPos)
                     rowAdjustedByColor = -1 if self.whiteToMove else 1
                     enpassant = str(column) + str(int(row) + 1 + rowAdjustedByColor)
-                    print('UPDATE enpassant TO:', enpassant)
                     self.enpassant = enpassant
                 else:
                     self.enpassant = '-'
@@ -440,9 +432,8 @@ class PgnToFen:
 
 
 if __name__ == "__main__":
-    pgnFormat = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7 c4 c6 cxb5 axb5 Nc3 Bb7 Bg5 b4 Nb1 h6 Bh4 c5 dxe5 Nxe4 Bxe7 Qxe7 exd6 Qf6 Nbd2 Nxd6 Nc4 Nxc4 Bxc4 Nb6 Ne5 Rae8 Bxf7+ Rxf7 Nxf7 Rxe1+ Qxe1 Kxf7 Qe3 Qg5 Qxg5 hxg5 b3 Ke6 a3 Kd6 axb4 cxb4 Ra5 Nd5 f3 Bc8 Kf2 Bf5 Ra7 g6 Ra6+ Kc5 Ke1 Nf4 g3 Nxh3 Kd2 Kb5 Rd6 Kc5 Ra6 Nf2 g4 Bd3 Re6'
-    #pgnFormat = 'e4 e5 Nf3 Nc6 Bb5 a6'
-    #final FEN: 8/8/4R1p1/2k3p1/1p4P1/1P1b1P2/3K1n2/8 b - - 2 43
-    #TODO: remember to fix R in front.
+    pgnFormat = 'c4 Nc6 Nc3 e5 Nf3 Nf6 g3 d5 cxd5 Nxd5 Bg2 Nb6 O-O Be7 a3 Be6 b4 a5 b5 Nd4 Nxd4 exd4 Na4 Bd5 Nxb6 cxb6 Bxd5'
     converter = PgnToFen()
-    converter.pgnToFen(pgnFormat.split(' '))
+    for move in pgnFormat.split(' '):
+        converter.move(move)
+        print(converter.getFullFen())

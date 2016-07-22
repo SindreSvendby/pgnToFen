@@ -193,9 +193,16 @@ class PgnToFenTester(unittest.TestCase):
     def test_enpassent_move(self):
        pgnConverter = pgntofen.PgnToFen()
        pgnConverter.resetBoard()
-       correctFen = 'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR d4 KQkq'
-       pgnConverter.pgnToFen(['d4', 'd6']);
-       correctFen = 'rnbqkbnr/ppp1pppp/3p4/8/3P4/8/PPP1PPPP/RNBQKBNR - KQkq'
+       correctFen = 'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b d3 KQkq'
+       pgnConverter.pgnToFen(['d4']);
+       self.assertEqual(correctFen, pgnConverter.getFullFen())
+
+    def test_self_discovery_chek_rook_move(self):
+       pgnConverter = pgntofen.PgnToFen()
+       pgnConverter.resetBoard()
+       correctFen = 'K6R/1R6/8/8/8/8/8/7q - -'
+       pgnConverter.pgnToFen(['Ra2']);
+       correctFen = 'KR6R/8/8/8/8/8/8/8 - -'
        self.assertEqual(correctFen, pgnConverter.getFullFen())
 
 if __name__ == '__main__':
