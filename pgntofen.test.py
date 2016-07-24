@@ -1,4 +1,5 @@
 #!/bin/python
+# coding=utf8
 import unittest
 
 import pgntofen
@@ -46,7 +47,7 @@ class PgnToFenTester(unittest.TestCase):
        pgnConverter = pgntofen.PgnToFen()
        pgnConverter.resetBoard()
        correctFen = 'rnbqkb1r/pppppppp/5n2/8/8/5N2/PPPPPPPP/RNBQKB1R'
-       pgnConverter.pgnToFen(['Nf3','Nf6']);
+       pgnConverter.moves(['Nf3','Nf6']);
        self.assertEqual(correctFen, pgnConverter.getFen())
 
     def test_column_knight_move(self):
@@ -246,8 +247,24 @@ class PgnToFenTester(unittest.TestCase):
        pgnConverter = pgntofen.PgnToFen()
        pgnConverter.resetBoard()
        moves = "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 Nc6 Bg5 e5 Bxf6 gxf6 Nf5 Bxf5 exf5 Be7 Nd5 O-O c3 Kh8 Bd3 Nb8 O-O Nd7 Be4 Nb6 Nxb6 Qxb6 Qb3 Qc7 Bd5 Bd8 Rad1 Qd7 Rd3 Qxf5 Rf3 Qg6 Qxb7 Bb6 Be4 Qg4 Bxh7 Kxh7 Rh3+ Qxh3 gxh3 f5 Kh1 Rae8 Rg1 Bxf2 Rg2 Be3 Qf3 Bh6 Qxf5+ Kh8 Qf6+ Kh7 Qxd6 e4 Rg4 Re6 Qc5 e3 Qf5+ Kh8 Re4 Rg6 Rg4 Re6 Re4 Rg6 Rh4 Kg7 Qe5+ Kg8 Rg4 Kh7 Qe4 Rg8 Qf5 Rf8 Kg2 Kg7 Kf3 Kh8 Qe5+ Kh7 Qe4 Kh8 Ke2 Re6 Qd4+ Kh7 Qxa7 Rf6 Qd4 Rf2+ Ke1 Re8 Qd3+ Kh8 Qd6 Kh7 Rh4 Re6 Qd3+ Kh8 Qd4+ Kh7 Qd3+ Kh8 Rxh6+ Rxh6 Qxe3 Rff6 Qd4 Kg8 a4 Re6+ Kf2 Ref6+ Kg3 Rhg6+ Kh4 Rd6 Qe4 Rde6 Qa8+ Kg7 Qd5 Re2 Qd4+ Kh7 Qf4 Kg8 Qb8+ Kg7 Qf4 Reg2 Qd4+ Kh7 Qe4 Rxb2 a5 Rb8 a6 Rh8 Qe5 Kg8+"
-       pgnConverter.pgnToFen(moves.split(' '));
+       pgnConverter.moves(moves.split(' '));
        correctFen = '6kr/5p2/P5r1/4Q3/7K/2P4P/7P/8 w - -'
+       self.assertEqual(correctFen, pgnConverter.getFullFen())
+
+    def test_file_accecpt_file(self):
+       pgnConverter = pgntofen.PgnToFen()
+       pgnConverter.resetBoard()
+       file = "test/Carlsen.pgn"
+       stats =  pgnConverter.pgnFile(file);
+       self.assertEqual(len(stats['failed']), 0)
+       self.assertEqual(len(stats['succeeded']), 1974)
+
+    def test_moves_accecpt_str(self):
+       pgnConverter = pgntofen.PgnToFen()
+       pgnConverter.resetBoard()
+       moves = "1.e4 c5 2.Nf3 d6 1/2-1/2"
+       pgnConverter.moves(moves);
+       correctFen = 'rnbqkbnr/pp2pppp/3p4/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w - KQkq'
        self.assertEqual(correctFen, pgnConverter.getFullFen())
 
     def test_real_example_self_discovery_chess(self):
@@ -301,6 +318,7 @@ class PgnToFenTester(unittest.TestCase):
         pgnConverter.pgnToFen(['Nd7']);
         correctFen = 'r2k3r/pppn1ppp/3bbn2/4p1B1/4P3/2N2N2/PPP2PPP/2KR1B1R w - KQkq'
         self.assertEqual(correctFen, pgnConverter.getFullFen())
+
 
 if __name__ == '__main__':
     unittest.main()

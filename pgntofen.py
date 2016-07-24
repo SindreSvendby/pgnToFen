@@ -1,7 +1,11 @@
 #!/bin/python
+# coding=utf8
 from __future__ import print_function
 from functools import partial
 import math
+import re
+import os
+
 
 class PgnToFen:
     fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
@@ -18,6 +22,9 @@ class PgnToFen:
     enpassant = '-'
     castlingRights = 'KQkq'
     DEBUG = False
+    lastMove = 'Before first move'
+    fens = []
+    result = ''
 
     def getFullFen(self):
         return self.getFen() + ' ' + ('w ' if self.whiteToMove else 'b ') + self.enpassant + ' ' + (self.castlingRights if self.castlingRights else '-')
@@ -43,26 +50,106 @@ class PgnToFen:
     def printFen(self):
         print(self.getFen())
 
+    def moves(self, moves):
+        if isinstance(moves, str):
+            nrReCompile = re.compile('[0-9]+\.')
+            transformedMoves = nrReCompile.sub('', moves)
+            pgnMoves = transformedMoves.replace('  ', ' ').split(' ')
+            result = pgnMoves[-1:][0]
+            if(result in ['1/2-1/2', '1-0', '0-1']):
+                self.result = result
+                pgnMoves = pgnMoves[:-1]
+            print('pgnMoves')
+            print(pgnMoves)
+            return self.pgnToFen(pgnMoves)
+        else:
+            return self.pgnToFen(moves)
+
+    def pgnFile(self, file):
+        pgnGames = {
+        'failed' : [],
+        'succeeded' : [],
+        }
+        started = False
+        game_info = []
+        pgnMoves = ''
+        for moves in open(file, 'rt').readlines():
+
+            if moves[:1] == '[':
+                #print('game_info line: ', moves)
+                game_info.append(moves)
+                continue
+            if moves[:2] == '1.':
+                started = True
+            if (moves == '\n' or moves == '\r\n') and started:
+                try:
+                    #print('Processing ', game_info[0:6])
+                    pgnToFen = PgnToFen()
+                    pgnToFen.resetBoard()
+                    fens = pgnToFen.moves(pgnMoves).getAllFens()
+                    pgnGames['succeeded'].append((game_info, fens))
+                except ValueError as e:
+                    pgnGames['failed'].append((game_info, '"' + pgnToFen.lastMove + '"', pgnToFen.getFullFen(), e))
+                except TypeError as e:
+                    pgnGames['failed'].append((game_info, '"' + pgnToFen.lastMove + '"', pgnToFen.getFullFen(), e))
+                except IndexError as e:
+                    raise IndexError(game_info, '"' + pgnToFen.lastMove + '"', pgnToFen.getFullFen(), e)
+                    pgnGames['failed'].append((game_info, '"' + pgnToFen.lastMove + '"', pgnToFen.getFullFen(), e))
+                except ZeroDivisionError as e:
+                    pgnGames['failed'].append((game_info, '"' + pgnToFen.lastMove + '"', pgnToFen.getFullFen(), e))
+                finally:
+                    started = False
+                    game_info = []
+                    pgnMoves = ''
+            if(started):
+                pgnMoves = pgnMoves + ' ' + moves.replace('\n', '').replace('\r', '')
+        return pgnGames
+
+
+
     def pgnToFen(self, moves):
-        loopC = 1
-        for move in moves:
-            self.DEBUG and print('=========')
-            self.DEBUG and print('Movenumber',loopC)
-            self.DEBUG and print('TO MOVE:', 'w' if self.whiteToMove else 'b')
-            self.DEBUG and print('MOVE:', move)
-            self.move(move)
-            self.DEBUG and print('after move:')
-            self.DEBUG and self.printBoard()
-            loopC = loopC + 1
-        return self
+        try:
+            loopC = 1
+            for move in moves:
+                self.lastMove = move
+                self.DEBUG and print('=========')
+                self.DEBUG and print('Movenumber',loopC)
+                self.DEBUG and print('TO MOVE:', 'w' if self.whiteToMove else 'b')
+                self.DEBUG and print('MOVE:', move)
+                self.move(move)
+                self.DEBUG and print('after move:')
+                self.DEBUG and self.printBoard()
+                loopC = loopC + 1
+                self.fens.append(self.getFullFen())
+            self.sucess = True
+            return self
+        except ValueError:
+            print('Converting PGN to FEN failed.')
+            print('Move that failed:', self.lastMove)
+            self.printBoard()
+            print(self.getFullFen())
+            self.fens = []
+            self.sucess = False
+
+
 
     def move(self, move):
-        self.handleAllmoves(move)
-        if(self.whiteToMove):
-            self.whiteToMove = False
-        else:
-            self.whiteToMove = True
-        return self
+        try:
+            self.lastMove = move
+            self.handleAllmoves(move)
+            if(self.whiteToMove):
+                self.whiteToMove = False
+            else:
+                self.whiteToMove = True
+            return self
+        except ValueError:
+            self.DEBUG and print('Converting PGN to FEN failed.')
+            self.DEBUG and print('Move that failed:', self.lastMove)
+            self.DEBUG and self.printBoard()
+            self.DEBUG and print('FEN:', self.getFullFen())
+
+    def getAllFens(self):
+        return self.fens
 
     def handleAllmoves(self, move):
         move = move.replace('+', '')
@@ -474,6 +561,7 @@ class PgnToFen:
             '1','1','1','1','1','1','1','1',
             'p','p','p','p','p','p','p','p',
             'r','n','b','q','k','b','n','r']
+        self.result = ''
 
     def printBoard(self):
         loop = 1
@@ -498,12 +586,7 @@ class PgnToFen:
 
         diffRow = int(kingRowInt - pieceRowInt)
         diffCol = int(kingColumnInt - pieceColumnInt)
-        self.DEBUG and print('checkLine: kingPos:', kingPos)
-        self.DEBUG and print('checkLine: piecePos:', piecePos)
-        self.DEBUG and print('checkLine: diffCol:', diffCol)
-        self.DEBUG and print('checkLine: diffRow:', diffRow)
         if (abs(diffRow) !=  abs(diffCol)) and diffRow != 0 and diffCol != 0:
-            self.DEBUG and print('checkLine: Not in vertial or horisontal line or diagonal, returning False => can not be a self-disvoery-check', )
             return True
         if abs(diffRow) > abs(diffCol):
             xVect = (diffCol / abs(diffRow))
