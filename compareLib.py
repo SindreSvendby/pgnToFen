@@ -5,7 +5,6 @@ zfe = 'ZeroDivisonError.txt'
 ve = 'ValueError.txt'
 ie = 'IndexError.txt'
 
-
 def main():
     zfeH = open(zfe, 'w')
     ieH = open(ie, 'w')
@@ -56,17 +55,14 @@ def main():
         if(started):
             pgnMoves = pgnMoves + moves
 
-
 def handleCompleteLine(line):
     moves = convertToKarFormat(line)
-    #print('THE STRING:', moves)
     pgnConverter = pgntofen.PgnToFen()
     board = chess.Board()
     pgnConverter.resetBoard()
     pgnConverter.pgnToFen(moves.split(' '))
     fenPosA = pgnConverter.getFullFen()
     for move in moves.split(' '):
-        #print('chess MOVE:', move)
         board.push_san(move)
     fenHash = toFENhash(board.fen())
     fenHash =''
@@ -79,8 +75,6 @@ def handleCompleteLine(line):
         print ('Var: ', fenPosA)
         print ('python-chess lib: ', fenHash)
         return False
-
-
 
 def convertToKarFormat(moves):
     #TODO: handle better ' 1-0\r\n'

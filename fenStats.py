@@ -4,30 +4,41 @@ from __future__ import print_function
 import pgntofen
 import chess
 
-def main():
+def main(lib):
     fenVictoryList = {}
     pgnConverter = pgntofen.PgnToFen()
-    lines = open('error.txt', 'r')
-    #errorFile = open('error.txt', 'w')
-    #board = chess.Board()
+    lines = open('test/20k-database.txt', 'r')
     loopC = 0
+    errorC = 0
     line = True
     while line:
         line = lines.readline()
         loopC = loopC + 1
+        board = chess.Board()
         pgnConverter.resetBoard()
         winner = line[0:1]
         moves = line[2:].replace('\r\n', '').replace('#', '').split(' ')
-        for move in moves:
-            pgnConverter.move(move)
-            #board.san(move)
-            fen = pgnConverter.getFullFen()
-            if fen in fenVictoryList:
-                updateWinningDict(winner, fenVictoryList[fen])
-            else:
-                fenVictoryList[fen] = createWinningDict(moves[0])
-        printProgress(loopC, 52, 'Processed', 'games', 0, 20)
-        #print('Processed: ' + str(loopC))
+        try:
+            for move in moves:
+                if lib == 'pgntofen':
+                    pgnConverter.move(move)
+                elif lib == 'chess-python':
+                    board.push_san(move)
+                else:
+                    raise NotImplementedError('Unexpected input arg:' + lib + '. Only pgntofen and chess-python valid options')
+                fen = pgnConverter.getFullFen()
+                if fen in fenVictoryList:
+                    updateWinningDict(winner, fenVictoryList[fen])
+                else:
+                    fenVictoryList[fen] = createWinningDict(moves[0])
+        except(IndexError, ValueError, ZeroDivisionError) as e:
+            print('ERROR:', e)
+            errorC = errorC + 1
+            errorC = errorC + 1
+
+        printProgress(loopC, 20000, 'Processed', 'games', 0, 40)
+    print('Processed: ' + str(loopC))
+    print('Error: ' + str(errorC))
 
 def updateWinningDict(winner, winlist):
     if winner == 'W':
@@ -70,4 +81,4 @@ def printProgress (iteration, total, prefix = '', suffix = '', decimals = 2, bar
         sys.stdout.flush()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1])
