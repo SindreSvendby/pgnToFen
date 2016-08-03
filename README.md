@@ -3,19 +3,15 @@ PGN to FEN
 
 A chess library, where the only purpose is to convert a PGN structur to FEN.
 
-<<<<<<< Updated upstream
 ## Usage
 
 The lib exposes several methods, to be used.
-=======
-Does not handle a PGN file, but handles an array of  moves. But without comments or the move number.
->>>>>>> Stashed changes
 
 ### Move
 
 You can insert one and one move if you want.
 
-#### E.g
+#### E.g 
 ```python
 import pgntofen # assumes you have pgntofen.py in the same directory, or you know how to handle python modules.
 pgnConverter = pgntofen.PgnToFen()
@@ -39,7 +35,6 @@ PGNMoves = 'd4 d5'
 pgnConverter.pgnToFen(PGNMoves.split(''))
 fen = pgnConverter.getFullFen()
 #fen will be 'rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR - KQkq'
-<<<<<<< Updated upstream
 ```
 
 ### pgnFile
@@ -62,8 +57,6 @@ stats =  pgnConverter.pgnFile(file);
 # pgntofen-error-obj: (game_info, lastMove, fen, error)
 # fens: array of fen
 # game_info is all the line in the pgn file working as a header before the game (e.g: all lines with [...])
-=======
->>>>>>> Stashed changes
 ```
 
 

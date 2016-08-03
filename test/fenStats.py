@@ -7,7 +7,7 @@ import chess
 def main(lib):
     fenVictoryList = {}
     pgnConverter = pgntofen.PgnToFen()
-    lines = open('test/20k-database.txt', 'r')
+    lines = open('20k-database.txt', 'r')
     loopC = 0
     errorC = 0
     line = True
