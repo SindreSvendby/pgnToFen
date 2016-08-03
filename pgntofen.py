@@ -1,6 +1,7 @@
 #!/bin/python
 # coding=utf8
 from __future__ import print_function
+from __future__ import division
 from functools import partial
 import math
 import re
@@ -261,7 +262,7 @@ class PgnToFen:
                         checkPos = pos
                         nothingInBetween = True
                         while(checkPos != newPos):
-                            checkPos = checkPos + yVect * 8 + xVect
+                            checkPos = int(checkPos + yVect * 8 + xVect)
                             if(checkPos == newPos):
                                 continue
                             if self.internalChessBoard[checkPos] != "1":
@@ -274,7 +275,7 @@ class PgnToFen:
             if len(potensialPosisitionsToRemove) == 0:
                 raise ValueError('Cant find a valid posistion to remove', potensialPosisitionsToRemove)
             notInCheckLineBindNewPos = partial(self.notInCheckLine, self.posOnBoard('K'))
-            correctPosToRemove = filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove)
+            correctPosToRemove = list(filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove))
             if len(correctPosToRemove) > 1:
                 raise ValueError('Several valid positions to remove from the board')
             if len(correctPosToRemove) == 0:
@@ -319,7 +320,7 @@ class PgnToFen:
                         checkPos = pos
                         nothingInBetween = True
                         while(checkPos != newPos):
-                            checkPos = checkPos + yVect * 8 + xVect
+                            checkPos = int(checkPos + yVect * 8 + xVect)
                             if(checkPos == newPos):
                                 continue
                             if self.internalChessBoard[checkPos] != "1":
@@ -332,7 +333,7 @@ class PgnToFen:
             if len(potensialPosisitionsToRemove) == 0:
                 raise ValueError('Cant find a valid posistion to remove', potensialPosisitionsToRemove)
             notInCheckLineBindNewPos = partial(self.notInCheckLine, self.posOnBoard('K'))
-            correctPosToRemove = filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove)
+            correctPosToRemove = list(filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove))
             if len(correctPosToRemove) > 1:
                 raise ValueError('Several valid positions to remove from the board')
             correctPos = correctPosToRemove[0]
@@ -392,7 +393,7 @@ class PgnToFen:
                         checkPos = pos
                         nothingInBetween = True
                         while(checkPos != newPos):
-                            checkPos = checkPos + yVect * 8 + xVect
+                            checkPos = int(checkPos + yVect * 8 + xVect)
                             if(checkPos == newPos):
                                 continue
                             if self.internalChessBoard[checkPos] != "1":
@@ -405,7 +406,7 @@ class PgnToFen:
             if len(potensialPosisitionsToRemove) == 0:
                 raise ValueError('Cant find a valid posistion to remove', potensialPosisitionsToRemove)
             notInCheckLineBindNewPos = partial(self.notInCheckLine, self.posOnBoard('K'))
-            correctPosToRemove = filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove)
+            correctPosToRemove = list(filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove))
             if len(correctPosToRemove) > 1:
                 raise ValueError('Several valid positions to remove from the board')
             correctPos = correctPosToRemove[0]
@@ -437,7 +438,7 @@ class PgnToFen:
             if len(potensialPosisitionsToRemove) == 0:
                 raise ValueError('Cant find a valid posistion to remove', potensialPosisitionsToRemove)
             notInCheckLineBindNewPos = partial(self.notInCheckLine, self.posOnBoard('K'))
-            correctPosToRemove = filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove)
+            correctPosToRemove = list(filter(notInCheckLineBindNewPos, potensialPosisitionsToRemove))
             if len(correctPosToRemove) > 1:
                 raise ValueError('Several valid positions to remove from the board')
             if len(correctPosToRemove) == 0:
@@ -504,7 +505,7 @@ class PgnToFen:
 
     def internalChessBoardPlaceToPlaceOnBoard(self, chessPos):
         column = int(chessPos) % 8
-        row = math.ceil(chessPos/8)
+        row = math.floor(chessPos/8)
         return (row, self.intToColum(column))
 
     def rowToInt(self, n):
@@ -597,7 +598,7 @@ class PgnToFen:
         checkPos = kingPos
         nothingInBetween = True
         while checkPos != piecePos and (checkPos < 64 and checkPos > 0):
-            checkPos = checkPos + yVect * 8 + xVect
+            checkPos = int(checkPos + yVect * 8 + xVect)
             if(checkPos == piecePos):
                 continue
             if self.internalChessBoard[checkPos] != "1":
@@ -616,7 +617,7 @@ class PgnToFen:
 
         while checkPos >= 0 and checkPos < 64 and columnsLeft > -1:
             columnsLeft = columnsLeft - abs(xVect)
-            checkPos = checkPos + posInMove
+            checkPos = int(checkPos + posInMove)
             if(checkPos < 0 or checkPos > 63):
                 continue
             if self.internalChessBoard[checkPos] in self.getOppositePieces(["Q", "R"]) and (xVect == 0 or yVect == 0):
