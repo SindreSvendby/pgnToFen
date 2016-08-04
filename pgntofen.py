@@ -106,8 +106,6 @@ class PgnToFen:
                 pgnMoves = pgnMoves + ' ' + moves.replace('\n', '').replace('\r', '')
         return pgnGames
 
-
-
     def pgnToFen(self, moves):
         try:
             loopC = 1
