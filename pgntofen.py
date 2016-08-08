@@ -5,12 +5,12 @@ from functools import partial
 import math
 import re
 import os
-# import numpy as np
+import numpy as np
 
 class PgnToFen:
     fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
     whiteToMove = True
-    internalChessBoard =  [
+    internalChessBoard =  np.array([
         ['R','N','B','Q','K','B','N','R'],
         ['P','P','P','P','P','P','P','P'],
         ['1','1','1','1','1','1','1','1'],
@@ -18,7 +18,7 @@ class PgnToFen:
         ['1','1','1','1','1','1','1','1'],
         ['1','1','1','1','1','1','1','1'],
         ['p','p','p','p','p','p','p','p'],
-        ['r','n','b','q','k','b','n','r']]
+        ['r','n','b','q','k','b','n','r']])
     enpassant = '-'
     castlingRights = 'KQkq'
     DEBUG = False
@@ -155,12 +155,16 @@ class PgnToFen:
         move = move.replace('+', '')
         move = move.replace('#', '')
         promote = ''
-        # Q and R are common mistakes done in PGN should be =Q and =R
-        if(move.find('=') > -1 or move[:-1] in ('Q', 'R')):
+        # Check if last part is a Q,R or N, it's a common mistake to skip the =
+        if move[-1] in ('Q', 'R', 'N') and move.find('=') == -1:
+            promote = move[-1]
+            move = move[:-1]
+
+        if move.find('=') > -1:
             promote = move[-1]
             move = move[:-2]
 
-        if(move.find('-O') != -1):
+        if move.find('-O') != -1:
             self.castelingMove(move)
             return;
 

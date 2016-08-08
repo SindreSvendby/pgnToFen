@@ -1,6 +1,7 @@
 import chess
 import pgntofen
 import re
+import os
 zfe = 'ZeroDivisonError.txt'
 ve = 'ValueError.txt'
 ie = 'IndexError.txt'
@@ -16,7 +17,7 @@ def main():
     okC = 0
     errorC = 0
     #for moves in open(ve, 'r').readlines():
-    for moves in open('test/Carlsen.pgn', 'r').readlines():
+    for moves in open(os.getcwd() + '/Carlsen.pgn', 'r').readlines():
         info = ()
         if(moves[:1] == '['):
             #print('skipping line: ', moves)

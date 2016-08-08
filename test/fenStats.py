@@ -3,11 +3,12 @@
 from __future__ import print_function
 import pgntofen
 import chess
+import os
 
 def main(lib):
     fenVictoryList = {}
     pgnConverter = pgntofen.PgnToFen()
-    lines = open('20k-database.txt', 'r')
+    lines = open(os.getcwd() + '/20k-database.txt', 'r')
     loopC = 0
     errorC = 0
     line = True
@@ -20,20 +21,23 @@ def main(lib):
         moves = line[2:].replace('\r\n', '').replace('\n', '').replace('#', '').split(' ')
         try:
             for move in moves:
-                if lib == 'pgntofen':
-                    pgnConverter.move(move)
-                elif lib == 'chess-python':
-                    board.push_san(move)
-                else:
-                    raise NotImplementedError('Unexpected input arg:' + lib + '. Only pgntofen and chess-python valid options')
-                fen = pgnConverter.getFullFen()
-                if fen in fenVictoryList:
-                    updateWinningDict(winner, fenVictoryList[fen])
-                else:
-                    fenVictoryList[fen] = createWinningDict(moves[0])
+                try:
+                    if lib == 'pgntofen':
+                        pgnConverter.move(move)
+                    elif lib == 'chess-python':
+                        board.push_san(move)
+                    else:
+                        raise NotImplementedError('Unexpected input arg:' + lib + '. Only pgntofen and chess-python valid options')
+                    fen = pgnConverter.getFullFen()
+                    if fen in fenVictoryList:
+                        updateWinningDict(winner, fenVictoryList[fen])
+                    else:
+                        fenVictoryList[fen] = createWinningDict(moves[0])
+                except (IndexError, ValueError, ZeroDivisionError) as e:
+                    print('MOVE:', move)
+                    raise e
         except(IndexError, ValueError, ZeroDivisionError) as e:
             print('ERROR:', e, moves)
-            errorC = errorC + 1
             errorC = errorC + 1
 
         printProgress(loopC, 20000, 'Processed', 'games', 0, 40)
