@@ -62,7 +62,7 @@ class PgnToFen:
             # print('result', result)
             self.result = result[0]
             pgnMoves = [move for move in pgnMoves[1:-2] if move != '']
-            print('pgnMoves', pgnMoves)
+            # print('pgnMoves', pgnMoves)
             return self.pgnToFen(pgnMoves)
         else:
             return self.pgnToFen(moves)
@@ -88,7 +88,7 @@ class PgnToFen:
                     #print('Processing ', game_info[0:6])
                 pgnToFen = PgnToFen()
                 pgnToFen.resetBoard()
-                print('MOVES:', pgnMoves)
+                # print('MOVES:', pgnMoves)
                 fens = pgnToFen.moves(pgnMoves).getAllFens()
                 pgnGames['succeeded'].append((game_info, fens))
                 # except ValueError as e:
@@ -211,8 +211,10 @@ class PgnToFen:
                 possiblePositionsToMove = self.validKnightPosistions(posistions, toPosition, specificCol, specificRow)
             else:
                 ## We use same algo. to detect changes for R, Q and B.
+                # print('before possiblePositionsToMove', posistions)
                 possiblePositionsToMove = self.findOldPosOfficer(piece, posistions, toPosition, specificCol, specificRow)
             # check for self discovered check.
+            # print('before removeSelfCheckMovesAndReturnOnlyLegalPosToUpdate', possiblePositionsToMove)
             correctOldPos = self.removeSelfCheckMovesAndReturnOnlyLegalPosToUpdate(possiblePositionsToMove)
         self.setPieceInternal(correctOldPos, "1")
 
@@ -313,7 +315,8 @@ class PgnToFen:
             if len(positions) == 0:
                 raise ValueError('Cant find a valid posistion to remove', positions)
             notInCheckLineBindNewPos = partial(self.notInCheckLine, self.posOnBoard('K'))
-            correctPosToRemove = filter(notInCheckLineBindNewPos, positions)
+            correctPosToRemove = list(filter(notInCheckLineBindNewPos, positions))
+            # print(correctPosToRemove)
             if len(correctPosToRemove) > 1:
                 raise ValueError('Several valid positions to remove from the board')
             if len(correctPosToRemove) == 0:
@@ -365,12 +368,14 @@ class PgnToFen:
 
             # Check if it is a enpassant move, and remove the piece if it is
             if(self.enpassant != '-'):
+                # print('enpassant move', self.enpassant, move)
                 if(self.enpassant == move):
                     if(self.whiteToMove == True):
-                        #TODO: fix something here!
-                        self.__getColumnRowFromSquare(move)
+                        (c, r) = self.__getColumnRowFromSquare(move)
+                        self.setPieceInternal({'row': r-1, 'column': c}, '1')
                     else:
-                        self.__getColumnRowFromSquare(move)
+                        (c, r) = self.__getColumnRowFromSquare(move)
+                        self.setPieceInternal({'row': r+1, 'column': c}, '1')
 
         else:
             #Update old place if just a normal line move
@@ -517,11 +522,11 @@ class PgnToFen:
         if (abs(diffRow) !=  abs(diffCol)) and diffRow != 0 and diffCol != 0:
             return True
         if abs(diffRow) > abs(diffCol):
-            columnVect = (diffCol / abs(diffRow))
-            rowVect = -(diffRow / abs(diffRow))
+            columnVect = int((diffCol / abs(diffRow)))
+            rowVect = -int((diffRow / abs(diffRow)))
         else:
-            columnVect = -(diffCol / abs(diffCol))
-            rowVect = -(diffRow / abs(diffCol))
+            columnVect = -int((diffCol / abs(diffCol)))
+            rowVect = -int((diffRow / abs(diffCol)))
         checkPos = kingPos.copy()
         nothingInBetween = True
         while not self.isSamePos(checkPos, piecePos):

@@ -46,14 +46,17 @@ def main():
                 ieH.write(pgnMoves)
                 errorC = errorC + 1
                 #raise RuntimeError('Lets look into this')
-            print('ok:', str(okC))
-            print('failed:', str(faledC))
-            print('errorC:', str(errorC))
-            print ('loop' + str(loopC))
+            except TypeError:
+                print('FALED HARD TypeError')
+                errorC = errorC + 1
             loopC = loopC+1
             pgnMoves = ''
         if(started):
             pgnMoves = pgnMoves + moves
+    print('ok:', str(okC))
+    print('failed:', str(faledC))
+    print('errorC:', str(errorC))
+    print ('loop' + str(loopC))
 
 def handleCompleteLine(line):
     moves = convertToKarFormat(line)
@@ -68,7 +71,7 @@ def handleCompleteLine(line):
     fenHash =''
     fenPosA=''
     if(fenPosA[:fenPosA.find(' ')] == fenHash[:fenHash.find(' ')]):
-        print("Equal ")
+        # print("Equal ")
         return True
     else:
         print("Not Equal")
