@@ -17,7 +17,7 @@ def main(lib):
         board = chess.Board()
         pgnConverter.resetBoard()
         winner = line[0:1]
-        moves = line[2:].replace('\r\n', '').replace('#', '').split(' ')
+        moves = line[2:].replace('\r\n', '').replace('\n', '').replace('#', '').split(' ')
         try:
             for move in moves:
                 if lib == 'pgntofen':
@@ -32,7 +32,7 @@ def main(lib):
                 else:
                     fenVictoryList[fen] = createWinningDict(moves[0])
         except(IndexError, ValueError, ZeroDivisionError) as e:
-            print('ERROR:', e)
+            print('ERROR:', e, moves)
             errorC = errorC + 1
             errorC = errorC + 1
 
