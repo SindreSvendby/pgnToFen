@@ -5,7 +5,7 @@ from functools import partial
 import math
 import re
 import os
-import numpy as np
+# import numpy as np
 
 class PgnToFen:
     fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
@@ -54,11 +54,15 @@ class PgnToFen:
         if isinstance(moves, str):
             nrReCompile = re.compile('[0-9]+\.')
             transformedMoves = nrReCompile.sub('', moves)
-            pgnMoves = transformedMoves.replace('  ', ' ').split(' ')
-            result = pgnMoves[-1:][0]
-            if(result in ['1/2-1/2', '1-0', '0-1']):
-                self.result = result
-                pgnMoves = pgnMoves[:-1]
+            pgnMoves = transformedMoves.split(' ')
+            # In test/Carlsen.png its two spaces before the result. Not sure if this is accourding to documentations, this could be a very fragile solution
+            # print('pgnMoves[-2:]', pgnMoves[-2:])
+            validResults = ['1/2-1/2', '1-0', '0-1']
+            result = [r for r in pgnMoves[-2:] if r in validResults]
+            # print('result', result)
+            self.result = result[0]
+            pgnMoves = [move for move in pgnMoves[1:-2] if move != '']
+            print('pgnMoves', pgnMoves)
             return self.pgnToFen(pgnMoves)
         else:
             return self.pgnToFen(moves)
@@ -97,9 +101,9 @@ class PgnToFen:
                 # except ZeroDivisionError as e:
                 #     pgnGames['failed'].append((game_info, '"' + pgnToFen.lastMove + '"', pgnToFen.getFullFen(), e))
                 # finally:
-                #     started = False
-                #     game_info = []
-                #     pgnMoves = ''
+                started = False
+                game_info = []
+                pgnMoves = ''
             if(started):
                 pgnMoves = pgnMoves + ' ' + moves.replace('\n', '').replace('\r', '')
         return pgnGames
@@ -147,6 +151,7 @@ class PgnToFen:
         return self.fens
 
     def handleAllmoves(self, move):
+        # print('handleAllmoves', move)
         move = move.replace('+', '')
         move = move.replace('#', '')
         promote = ''
@@ -185,7 +190,6 @@ class PgnToFen:
                 specificRow = move[1]
 
         if(piece == 'P'):
-            print('TO pos:', toPosition)
             self.pawnMove(toPosition, specificCol, specificRow, takes, promote)
             return
         elif(piece != 'P'):
@@ -279,11 +283,11 @@ class PgnToFen:
                 rowVect = 0
 
                 if abs(diffRow) > abs(diffCol):
-                    columnVect = -(diffCol / abs(diffRow))
-                    rowVect = -(diffRow / abs(diffRow))
+                    columnVect = -int((diffCol / abs(diffRow)))
+                    rowVect = -int((diffRow / abs(diffRow)))
                 else:
-                    columnVect = -(diffCol / abs(diffCol))
-                    rowVect = -(diffRow / abs(diffCol))
+                    columnVect = -int((diffCol / abs(diffCol)))
+                    rowVect = -int((diffRow / abs(diffCol)))
                 # Need to copy so we do not change pos later when we change checkPos
                 checkPos = pos.copy()
                 nothingInBetween = True
@@ -395,9 +399,9 @@ class PgnToFen:
             :param square: string: the square, eg. 'a1' to 'h8'
             :param piece: string: a valid piece 'K'|'Q'|'R'|'N'|'B'|'P' or a black counter-part, if you set 1 or just leave it blank and if will use the default parameter
         """
-        print('square:', square)
-        print('square[0]', square[0])
-        print('square[1]', square[1])
+        # print('square:', square)
+        # print('square[0]', square[0])
+        # print('square[1]', square[1])
         column = self.__columnToInt(square[0])
         row = self.__rowToInt(square[1])
         self.internalChessBoard[row][column] = piece
