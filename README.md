@@ -39,7 +39,7 @@ fen = pgnConverter.getFullFen()
 
 ### pgnFile
 
-parse a pgnFile that may have sveral pgn games. See `test/Carlsen.png` for an example
+parse a pgnFile that may have sveral pgn games. See `test/Carlsen.pgn` for an example
 
 #### E.g
 
