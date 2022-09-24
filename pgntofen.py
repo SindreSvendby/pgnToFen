@@ -9,24 +9,25 @@ import os
 
 
 class PgnToFen:
-    fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-    whiteToMove = True
-    internalChessBoard = [
-        'R','N','B','Q','K','B','N','R',
-        'P','P','P','P','P','P','P','P',
-        '1','1','1','1','1','1','1','1',
-        '1','1','1','1','1','1','1','1',
-        '1','1','1','1','1','1','1','1',
-        '1','1','1','1','1','1','1','1',
-        'p','p','p','p','p','p','p','p',
-        'r','n','b','q','k','b','n','r']
-    enpassant = '-'
-    castlingRights = 'KQkq'
-    DEBUG = False
-    lastMove = 'Before first move'
-    fens = []
-    result = ''
-
+    def __init__(self) -> None:
+        self.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+        self.whiteToMove = True
+        self.internalChessBoard = [
+            'R','N','B','Q','K','B','N','R',
+            'P','P','P','P','P','P','P','P',
+            '1','1','1','1','1','1','1','1',
+            '1','1','1','1','1','1','1','1',
+            '1','1','1','1','1','1','1','1',
+            '1','1','1','1','1','1','1','1',
+            'p','p','p','p','p','p','p','p',
+            'r','n','b','q','k','b','n','r']
+        self.enpassant = '-'
+        self.castlingRights = 'KQkq'
+        self.DEBUG = False
+        self.lastMove = 'Before first move'
+        self.fens = []
+        self.result = ''
+    
     def getFullFen(self):
         return self.getFen() + ' ' + ('w ' if self.whiteToMove else 'b ') + self.enpassant + ' ' + (self.castlingRights if self.castlingRights else '-')
 
@@ -35,14 +36,14 @@ class PgnToFen:
         for n in reversed((8,16,24,32,40,48,56,64)):
             emptyPosLength = 0;
             for i in self.internalChessBoard[n-8:n]:
-                if(i is not '1'):
-                    if(emptyPosLength is not 0):
+                if(i != '1'):
+                    if(emptyPosLength != 0):
                         fenpos = fenpos + str(emptyPosLength);
                         emptyPosLength = 0
                     fenpos = fenpos + i
                 else:
                     emptyPosLength = emptyPosLength + 1
-            if(emptyPosLength is not 0):
+            if(emptyPosLength != 0):
                 fenpos = fenpos + str(emptyPosLength);
             fenpos = fenpos + '/'
         fenpos = fenpos[:-1]
